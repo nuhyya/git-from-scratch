@@ -1,6 +1,8 @@
 import os, hashlib, zlib
 from vctrl.repo import repo_path
 
+
+#creates a hash object - with header and data compressed
 def hash_object(data, type_ = "blob"):
     header = f"{type_} {len(data)}\0".encode()
     full_data = header + data
@@ -13,6 +15,7 @@ def hash_object(data, type_ = "blob"):
 
     return oid 
 
+#decompress given object at path oid and extract header and data 
 def get_object(oid, expected_type = None):
     path = os.path.join(repo_path() + "objects" + oid)
 

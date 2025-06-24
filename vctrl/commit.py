@@ -1,6 +1,8 @@
 import time
 from vctrl.objects import hash_object
 
+#creates a commit tree, returns encoded object
+
 def create_commit(tree_oid, user_name, user_email, parent = None, message = ""):
     commit = f"tree {tree_oid}\n"
     if parent:

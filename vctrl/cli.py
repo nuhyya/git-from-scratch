@@ -1,6 +1,7 @@
 import argparse
 from . import repo
 
+#this file is used to parse command line 
 
 def main():
     parser = argparse.ArgumentParser(description = "VCTRL - a version control system clone for my personal learning project")
