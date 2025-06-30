@@ -25,25 +25,25 @@ def login(args):
         print("Login failed")
 
 def push(args):
-    from remote import push
+    from vctrl.remote import push
     push(args.remote, os.getcwd())
     print("Push complete")
 
 def pull(args):
-    from remote import pull
+    from vctrl.remote import pull
     pull(args.remote, os.getcwd())
     print("Pull complete")
 
 def clone(args):
-    from remote import clone
+    from vctrl.remote import clone
     clone(args.remote, args.dest)
 
 def add(args):
-    from vctrl.commands.add import add
+    from vctrl.index import add
     add(args.file)
 
 def commit(args):
-    from vctrl.commands.commit import commit
+    from vctrl.commit import commit
     commit(args.message)
 
 def checkout(args):
