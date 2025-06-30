@@ -155,6 +155,7 @@ class TestFetch:
 # ---------------------------
 # TestMerge
 # ---------------------------
+
 class TestMerge:
 
     @patch('vctrl.commands.merge.checkout_tree')
@@ -163,13 +164,66 @@ class TestMerge:
     @patch('builtins.print')
     def test_merge_success(self, mock_print, mock_from_file, mock_write, mock_checkout):
         from vctrl.commands.merge import merge
+
         base = MagicMock()
         base.data = b"treebase\nmessage"
         other = MagicMock()
         other.data = b"treeother\nmessage"
-        mock_from_file.side_effect = [base, other]
+        base_tree = MagicMock()
+        base_tree.data = b"100644 file.txt abc123"
+        other_tree = MagicMock()
+        other_tree.data = b"100644 file.txt abc123"
+
+        mock_from_file.side_effect = [base, other, base_tree, other_tree]
         merge("base123", "other456")
+
         mock_checkout.assert_called_once_with("treeother")
-        mock_write.assert_called_once_with({})
-        mock_print.assert_called_once()
+        mock_write.assert_called_once_with({'file.txt': 'abc123'})
+        mock_print.assert_called_once_with("Merge successful with no conflicts.")
+
+    @patch('vctrl.commands.merge.checkout_tree')
+    @patch('vctrl.commands.merge.write_index')
+    @patch('vctrl.commands.merge.Blob')
+    @patch('vctrl.commands.merge.GitObject.from_file')
+    @patch('builtins.print')
+    def test_merge_with_conflict(self, mock_print, mock_from_file, mock_blob_class, mock_write_index, mock_checkout_tree):
+        from vctrl.commands.merge import merge
+
+        base_commit = MagicMock()
+        base_commit.data = b"base_tree\ncommit msg"
+        other_commit = MagicMock()
+        other_commit.data = b"other_tree\ncommit msg"
+
+        base_tree = MagicMock()
+        base_tree.data = b"100644 file.txt abc123"
+        other_tree = MagicMock()
+        other_tree.data = b"100644 file.txt def456"
+
+        base_blob = MagicMock()
+        base_blob.data = b"hello"
+
+        other_blob = MagicMock()
+        other_blob.data = b"world"
+
+        mock_from_file.side_effect = [
+            base_commit, other_commit,
+            base_tree, other_tree,
+            base_blob, other_blob
+        ]
+
+        mock_blob_instance = MagicMock()
+        mock_blob_instance.save.return_value = "mergedconflict"
+        mock_blob_class.return_value = mock_blob_instance
+
+        merge("base123", "other456")
+
+        mock_blob_class.assert_called_once()
+        mock_blob_instance = mock_blob_class.call_args[0][0]
+        assert b"<<<<<<< HEAD" in mock_blob_instance
+        assert b"hello" in mock_blob_instance
+        assert b"world" in mock_blob_instance
+        assert b">>>>>>> MERGE" in mock_blob_instance
+
+        mock_print.assert_any_call("Merge completed with conflicts in:")
+        mock_print.assert_any_call("  - file.txt")
 
