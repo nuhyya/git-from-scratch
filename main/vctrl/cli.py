@@ -70,7 +70,7 @@ def fetch(args):
     fetch(args.remote)
 
 def init(args):
-    from vctrl.commands.init import init
+    from vctrl.repo import init
     init()
 
 def main():
