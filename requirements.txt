@@ -2,4 +2,5 @@ click
 flask 
 requests 
 colorama 
+PyJWT
 pytest 
