@@ -1,7 +1,8 @@
-# cli.py
-from vctrl.commands.branch import create_branch, list_branches
-import argparse, os, json
+#!/usr/bin/env python3
+
+import argparse, os, json, sys
 import requests
+from vctrl.commands.branch import create_branch, list_branches
 
 CONFIG = os.path.expanduser("~/.vctrlcli")
 
@@ -27,12 +28,10 @@ def login(args):
 def push(args):
     from vctrl.remote import push
     push(args.remote, os.getcwd())
-    print("Push complete")
 
 def pull(args):
     from vctrl.remote import pull
     pull(args.remote, os.getcwd())
-    print("Pull complete")
 
 def clone(args):
     from vctrl.remote import clone
@@ -40,7 +39,7 @@ def clone(args):
 
 def add(args):
     from vctrl.index import add
-    add(args.file)
+    add(args.path)
 
 def commit(args):
     from vctrl.commit import commit
@@ -51,9 +50,11 @@ def checkout(args):
     checkout(args.name)
 
 def branch(args):
-    from vctrl.commands.branch import create_branch, list_branches
-    if args.name:
+    if args.name and args.create:
         create_branch(args.name)
+    elif args.name:
+        print(f"Switching to branch {args.name}")
+        checkout(args)
     else:
         list_branches()
 
@@ -71,68 +72,88 @@ def fetch(args):
 
 def init(args):
     from vctrl.repo import init
-    init()
+    init(args.path)
+
+def build_parser():
+    parser = argparse.ArgumentParser(prog='vctrl', description="Git-like version control tool")
+    subparsers = parser.add_subparsers(title='subcommands', dest='command')
+
+    # login
+    login_parser = subparsers.add_parser("login")
+    login_parser.add_argument("--server", required=True)
+    login_parser.add_argument("--username", required=True)
+    login_parser.add_argument("--password", required=True)
+    login_parser.set_defaults(func=login)
+
+    # init
+    init_parser = subparsers.add_parser("init", help="Initialize a repo")
+    init_parser.add_argument("path", nargs='?', default=os.getcwd())
+    init_parser.set_defaults(func=init)
+
+    # add
+    add_parser = subparsers.add_parser("add", help="Add a file to index")
+    add_parser.add_argument("path")
+    add_parser.set_defaults(func=add)
+
+    # commit
+    commit_parser = subparsers.add_parser("commit", help="Commit changes")
+    commit_parser.add_argument("-m", "--message", required=True)
+    commit_parser.set_defaults(func=commit)
+
+    # checkout
+    checkout_parser = subparsers.add_parser("checkout", help="Checkout branch or commit")
+    checkout_parser.add_argument("name")
+    checkout_parser.set_defaults(func=checkout)
+
+    # branch
+    branch_parser = subparsers.add_parser("branch", help="Create/list/switch branches")
+    branch_parser.add_argument("name", nargs="?", help="Branch name")
+    branch_parser.add_argument("-b", "--create", action="store_true", help="Create new branch")
+    branch_parser.set_defaults(func=branch)
+
+    # diff
+    diff_parser = subparsers.add_parser("diff", help="Show diff")
+    diff_parser.set_defaults(func=diff)
+
+    # merge
+    merge_parser = subparsers.add_parser("merge", help="Merge branches")
+    merge_parser.add_argument("base")
+    merge_parser.add_argument("other")
+    merge_parser.set_defaults(func=merge)
+
+    # fetch
+    fetch_parser = subparsers.add_parser("fetch", help="Fetch from remote")
+    fetch_parser.add_argument("remote")
+    fetch_parser.set_defaults(func=fetch)
+
+    # push
+    push_parser = subparsers.add_parser("push", help="Push to remote")
+    push_parser.add_argument("remote")
+    push_parser.set_defaults(func=push)
+
+    # pull
+    pull_parser = subparsers.add_parser("pull", help="Pull from remote")
+    pull_parser.add_argument("remote")
+    pull_parser.set_defaults(func=pull)
+
+    # clone
+    clone_parser = subparsers.add_parser("clone", help="Clone from remote")
+    clone_parser.add_argument("remote")
+    clone_parser.add_argument("dest")
+    clone_parser.set_defaults(func=clone)
+
+    return parser
 
 def main():
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
-
-    parser_login = subparsers.add_parser("login")
-    parser_login.add_argument("--server")
-    parser_login.add_argument("--username")
-    parser_login.add_argument("--password")
-    parser_login.set_defaults(func=login)
-
-    parser_push = subparsers.add_parser("push")
-    parser_push.add_argument("--remote")
-    parser_push.set_defaults(func=push)
-
-    parser_pull = subparsers.add_parser("pull")
-    parser_pull.add_argument("--remote")
-    parser_pull.set_defaults(func=pull)
-
-    parser_clone = subparsers.add_parser("clone")
-    parser_clone.add_argument("--remote")
-    parser_clone.add_argument("--dest")
-    parser_clone.set_defaults(func=clone)
-
-    parser_add = subparsers.add_parser("add")
-    parser_add.add_argument("file")
-    parser_add.set_defaults(func=add)
-
-    parser_commit = subparsers.add_parser("commit")
-    parser_commit.add_argument("message")
-    parser_commit.set_defaults(func=commit)
-
-    parser_checkout = subparsers.add_parser("checkout")
-    parser_checkout.add_argument("name")
-    parser_checkout.set_defaults(func=checkout)
-
-    parser_branch = subparsers.add_parser("branch")
-    parser_branch.add_argument("--name", default=None)
-    parser_branch.set_defaults(func=branch)
-
-    parser_diff = subparsers.add_parser("diff")
-    parser_diff.set_defaults(func=diff)
-
-    parser_merge = subparsers.add_parser("merge")
-    parser_merge.add_argument("base")
-    parser_merge.add_argument("other")
-    parser_merge.set_defaults(func=merge)
-
-    parser_fetch = subparsers.add_parser("fetch")
-    parser_fetch.add_argument("remote")
-    parser_fetch.set_defaults(func=fetch)
-
-    parser_init = subparsers.add_parser("init")
-    parser_init.set_defaults(func=init)
-
+    parser = build_parser()
     args = parser.parse_args()
+
     if hasattr(args, 'func'):
         args.func(args)
     else:
         parser.print_help()
+        sys.exit(1)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 

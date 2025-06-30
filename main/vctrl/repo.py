@@ -14,7 +14,7 @@ def init():
     with open(os.path.join(path, "HEAD"), "w") as f:
         f.write("ref: refs/heads/main")
 
-    print("Initialised empty repo with path {path}")
+    print(f"Initialised empty repo with path {path}")
     return path
 
 
