@@ -3,11 +3,12 @@ import os
 #initialises and manages repo structure 
 
 def repo_path():
-    return os.path.join(os.getcwd(), ".vctrl")
+    return os.path.join(os.getcwd())
 
-def init():
-    path = repo_path()
-
+def init(path=None):
+    if path is None:
+        path = repo_path()
+    path = os.path.join(path, ".vctrl")
     os.makedirs(os.path.join(path, "refs"), exist_ok = True)
     os.makedirs(os.path.join(path, "objects"), exist_ok = True)
 
