@@ -38,8 +38,29 @@ def clone(args):
     clone(args.remote, args.dest)
 
 def add(args):
-    from vctrl.index import add
-    add(args.path)
+    import os
+    from vctrl.hash_object import hash_object
+    from vctrl.index import add_to_index
+
+    if args.path == ".":
+        # Walk through all files recursively
+        for root, dirs, files in os.walk(os.getcwd()):
+            for fname in files:
+                full_path = os.path.join(root, fname)
+                if ".vctrl" in full_path:
+                    continue  # Skip internal repo files
+                with open(full_path, 'rb') as f:
+                    data = f.read()
+                oid = hash_object(data, write=True)
+                rel_path = os.path.relpath(full_path, os.getcwd())
+                add_to_index(rel_path, oid)
+    else:
+        # Single file
+        full_path = os.path.join(os.getcwd(), args.path)
+        with open(full_path, 'rb') as f:
+            data = f.read()
+        oid = hash_object(data, write=True)
+        add_to_index(args.path, oid)
 
 def commit(args):
     from vctrl.commit import commit
