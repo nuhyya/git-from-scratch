@@ -56,7 +56,7 @@ class Tree(GitObject):
         entries = []
 
         for entry in sorted(os.listdir(directory)):
-            if entry.startswith('.') or entry == '__pycache__':
+            if entry.startswith('.') or entry in {'__pycache__', 'build', 'dist', 'venv'}:
                 continue  # Skip hidden and system files like .DS_Store
 
             path = os.path.join(directory, entry)
@@ -144,9 +144,12 @@ def get_object(oid, expected_type=None):
 def read_object(oid, expected_type=None):
     return get_object(oid, expected_type)
 
+from vctrl.index import read_index
 
-def write_tree(directory='.'):
-    tree = Tree.from_directory(directory)
-    if tree.entries:
-        return tree.save()
-    return None
+def write_tree():
+    entries = []
+    index = read_index()
+    for path, oid in index.items():
+        entries.append(("blob", oid, path))
+    tree = Tree(entries=entries)
+    return tree.save()
