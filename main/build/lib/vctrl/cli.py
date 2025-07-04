@@ -149,10 +149,12 @@ def diff(args):
     diff_index_vs_workdir()
     print("Diff complete")
 
-def merge(args):
+def merge_command(args):
+    from vctrl.refs import get_ref
+    base_oid = get_ref(f"refs/heads/{args.base}")
+    other_oid = get_ref(f"refs/heads/{args.other}")
     from vctrl.commands.merge import merge
-    merge(args.base, args.other)
-    print(f"Merged {args.other} into {args.base}")
+    merge(base_oid, other_oid)
 
 def fetch(args):
     from vctrl.commands.fetch import fetch
@@ -201,7 +203,7 @@ def build_parser():
     merge_parser = subparsers.add_parser("merge", help="Merge branches")
     merge_parser.add_argument("base")
     merge_parser.add_argument("other")
-    merge_parser.set_defaults(func=merge)
+    merge_parser.set_defaults(func=merge_command)
 
     fetch_parser = subparsers.add_parser("fetch", help="Fetch from remote")
     fetch_parser.add_argument("remote")

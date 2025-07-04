@@ -16,8 +16,8 @@ def merge(base_oid, other_oid):
     base = GitObject.from_file(base_oid, expected_type="commit")
     other = GitObject.from_file(other_oid, expected_type="commit")
 
-    base_tree_oid = base.data.decode().splitlines()[0]
-    other_tree_oid = other.data.decode().splitlines()[0]
+    base_tree_oid = base.data.decode().splitlines()[0].split()[1]
+    other_tree_oid = other.data.decode().splitlines()[0].split()[1]
 
     base_tree = get_tree_entries(base_tree_oid)
     other_tree = get_tree_entries(other_tree_oid)
