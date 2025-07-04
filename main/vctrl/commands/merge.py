@@ -8,7 +8,7 @@ def get_tree_entries(tree_oid):
     for entry in tree.data.decode().splitlines():
         parts = entry.split()
         if len(parts) == 3:
-            _, path, oid = parts
+            type_, oid, path = parts
             entries[path] = oid
     return entries
 

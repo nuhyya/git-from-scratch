@@ -12,7 +12,16 @@ def checkout(name):
     except FileNotFoundError:
         oid = name  # Fallback to raw OID
 
-    commit = GitObject.from_file(oid, expected_type="commit")
+    if oid is None or not isinstance(oid, str) or not oid.strip():
+        print(f"❌ Branch or commit '{name}' not found.")
+        return
+
+    try:
+        commit = GitObject.from_file(oid, expected_type="commit")
+    except FileNotFoundError:
+        print(f"❌ Commit object '{oid}' not found in object store.")
+        return
+
     tree_oid = commit.data.decode().split("\n")[0].split()[1]
 
     # Replace working directory with tree contents
@@ -25,6 +34,7 @@ def checkout(name):
     clear_index()
 
 
+
 def checkout_tree(tree_oid):
     tree = GitObject.from_file(tree_oid, expected_type="tree")
     entries = tree.data.decode().splitlines()
@@ -33,10 +43,13 @@ def checkout_tree(tree_oid):
         if len(parts) != 3:
             raise ValueError(f"Malformed tree entry: {entry}")
 
-        type_, oid, path = parts 
-        blob = GitObject.from_file(oid, expected_type="blob")
-        dir_name = os.path.dirname(path)
-        if dir_name:
-            os.makedirs(dir_name, exist_ok=True)
+        type_, oid, path = parts
+        try:
+            blob = GitObject.from_file(oid, expected_type="blob")
+        except FileNotFoundError:
+            print(f"⚠️ Warning: Missing blob object for {path} ({oid})")
+        continue
+
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         with open(path, "wb") as f:
             f.write(blob.data)
