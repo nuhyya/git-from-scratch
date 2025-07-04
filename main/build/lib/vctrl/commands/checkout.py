@@ -33,10 +33,10 @@ def checkout_tree(tree_oid):
         if len(parts) != 3:
             raise ValueError(f"Malformed tree entry: {entry}")
 
-        mode, path, oid = parts 
+        type_, oid, path = parts 
         blob = GitObject.from_file(oid, expected_type="blob")
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        dir_name = os.path.dirname(path)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
         with open(path, "wb") as f:
             f.write(blob.data)
-
-

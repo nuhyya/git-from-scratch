@@ -44,7 +44,7 @@ class Tree(GitObject):
     def _serialize_entries(self):
         if not self.entries:
             return b""
-        tree_content = "\n".join(f"{typ} {oid} {name}" for typ, oid, name in self.entries)
+        tree_content = "\n".join(f"{type_} {oid} {name}" for type_, oid, name in self.entries)
         return tree_content.encode()
     
     def add_entry(self, type_, oid, name):
