@@ -145,8 +145,8 @@ def handle_branch(args):
         list_branches()
 
 def diff(args):
-    from vctrl.commands.diff import diff
-    diff()
+    from vctrl.commands.diff import diff_index_vs_workdir
+    diff_index_vs_workdir()
     print("Diff complete")
 
 def merge(args):
