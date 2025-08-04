@@ -24,6 +24,7 @@ pip install .
 ```
 --
 ## Architecture
+```
                        +-----------------------+
                        |     User / CLI        |
                        |  vctrl <command>      |
@@ -55,7 +56,7 @@ pip install .
                                                   | Object store  |
                                                   | Index, HEAD   |
                                                   +---------------+
-
+```
 --
 ## Usage 
 ```bash
@@ -102,5 +103,6 @@ Tree and commit objects
 References (HEAD, branches)
 
 Checkout and merge mechanics
+
 
 
