@@ -13,7 +13,7 @@
 - Create and switch between branches
 - Merge branches (basic functionality)
 
---
+---
 
 ## Installation
 
@@ -22,7 +22,7 @@ git clone https://github.com/yourusername/vctrl.git
 cd vctrl
 pip install .
 ```
---
+---
 ## Architecture
 ```
                        +-----------------------+
@@ -57,7 +57,7 @@ pip install .
                                                   | Index, HEAD   |
                                                   +---------------+
 ```
---
+---
 ## Usage 
 ```bash
 vctrl init               # Initialize a new vctrl repository
@@ -68,7 +68,7 @@ vctrl branch <name>      # Create a new branch
 vctrl checkout <branch>  # Switch to a branch
 vctrl merge <branch>     # Merge branch into current
 ```
---
+---
 ## Project Structure 
 ```bash
 vctrl/
@@ -83,7 +83,7 @@ vctrl/
     ├── diff.py
     └── merge.py
 ```
---
+---
 ## Design Principles
 Built using only Python standard library (argparse, hashlib, zlib, os, etc.)
 
@@ -91,7 +91,7 @@ Mimics Git object model (blobs, trees, commits)
 
 Simplified implementation for learning 
 
---
+---
 This project is a hands-on tool for understanding how Git works internally:
 
 SHA-1 object hashing
@@ -103,6 +103,7 @@ Tree and commit objects
 References (HEAD, branches)
 
 Checkout and merge mechanics
+
 
 
 
